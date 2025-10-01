@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\KategoriBuku;
 
 class KategoriBukuController extends Controller
 {
@@ -11,7 +12,9 @@ class KategoriBukuController extends Controller
      */
     public function index()
     {
-        return view('kategori-buku.buku');
+        $data_kategori_buku = KategoriBuku::all()->sortBy('kategori');
+        $jumlah_data = $data_kategori_buku->count();
+        return view('kategori-buku.tampil', ['KategoriBuku' => $data_kategori_buku, 'JumlahKategoriBuku' => $jumlah_data]);
     }
 
     /**
@@ -27,8 +30,15 @@ class KategoriBukuController extends Controller
      */
     public function store(Request $request)
     {
-        $kategori_buku = $request->kategori_buku;
-        return $kategori_buku;
+        $validated = $request->validate([
+            'kategori' => 'required|string|max:100',
+        ]);
+
+        $kategori = new KategoriBuku;
+        $kategori->kategori = $validated['kategori'];
+        $kategori->save();
+
+        return redirect('/kategori-buku');
     }
 
     /**
@@ -44,7 +54,8 @@ class KategoriBukuController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $data_kategori_buku = KategoriBuku::find($id);
+        return view('kategori-buku.edit', ['KategoriBuku' => $data_kategori_buku]);
     }
 
     /**
@@ -52,7 +63,19 @@ class KategoriBukuController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'kategori' => 'required|string|max:100',
+        ]);
+
+        $kategori = KategoriBuku::find($id);
+        if (! $kategori) {
+            return redirect('/kategori-buku')->with('error', 'Data tidak ditemukan');
+        }
+
+        $kategori->kategori = $validated['kategori'];
+        $kategori->save();
+
+        return redirect('/kategori-buku');
     }
 
     /**
@@ -60,6 +83,10 @@ class KategoriBukuController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $kategori = KategoriBuku::find($id);
+        if ($kategori) {
+            $kategori->delete();
+        }
+        return redirect('/kategori-buku');
     }
 }

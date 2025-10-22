@@ -11,8 +11,17 @@ class haiController extends Controller
      */
     public function index()
     {
-        $prodi = ['Teknik Informatika', 'Sistem Informasi', 'Teknologi Informasi'];
-        return view('selamat.hai', ['namaprodi' => $prodi]);
+        $buku = [
+            'HTML 5',
+            'Trip dan trik pemrograman PHP7',
+            'Belajar cepat javascript',
+            'Membangun web dengan PHP dan MySQL',
+        ];
+        $collection = collect($buku)->map(function ($judul) {
+            return strtoupper($judul);
+        });
+
+        return $collection;
     }
 
     /**

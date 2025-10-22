@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\Penerbit;
+use App\Models\Telepon;
 use Illuminate\Http\Request;
 
 class PenerbitController extends Controller
@@ -12,14 +13,12 @@ class PenerbitController extends Controller
      */
     public function index()
     {
-        $data_penerbit = DB::table('penerbit')->select('*')
-        ->orderBy('penerbit','ASC')->get();
+        // Ambil Penerbit beserta relasi Telepon
+        $data_penerbit = Penerbit::with('telepon')->get();
+        $jumlah_data = $data_penerbit->count();
 
-        $jumalah_data = DB::table('penerbit')->select('penerbit',
-        DB::raw('COUNT(penerbit) as jumlah_penerbit'))
-        ->groupBy('penerbit')->get();
-        return view('penerbit.tampil', ['PenerbitBuku' => $data_penerbit , 'JumlahPenerbitBuku' => $jumalah_data
-        ]);
+        return view('penerbit.tampil', ['PenerbitBuku' => $data_penerbit,
+            'JumlahPenerbitBuku' => $jumlah_data]);
     }
 
     /**
@@ -35,11 +34,12 @@ class PenerbitController extends Controller
      */
     public function store(Request $request)
     {
-        $dataPenerbit =array(
-            'penerbit' => $request->penerbit,
-            'alamat' => $request->alamat
-        );
-        DB::table('penerbit')->insert($dataPenerbit);
+        $input = $request->all();
+        $penerbit = Penerbit::create($input);
+        $telepon = new Telepon;
+        $telepon->telepon = $request->no_telp;
+        $penerbit->telepon()->save($telepon);
+
         return redirect('/penerbit');
     }
 
@@ -56,8 +56,7 @@ class PenerbitController extends Controller
      */
     public function edit(string $id)
     {
-        $data_penerbit = DB::table('penerbit')->select('*')
-        ->where('id_penerbit', $id)->first();
+        $data_penerbit = Penerbit::find($id);
 
         return view('penerbit.edit', ['PenerbitBuku' => $data_penerbit]);
     }
@@ -67,11 +66,13 @@ class PenerbitController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $dataPenerbit = array(
-            'penerbit' => $request->penerbit,
-            'alamat' => $request->alamat
-        );
-        $data_penerbit = DB::table('penerbit')->where('id_penerbit', $id)->update($dataPenerbit);
+        $penerbit = Penerbit::find($id);
+        $input = $request->all();
+        $penerbit->update($input);
+        $telepon = $penerbit->telepon;
+        $telepon->telepon = $request->no_telp;
+        $penerbit->telepon()->save($telepon);
+
         return redirect('/penerbit');
     }
 
@@ -80,7 +81,9 @@ class PenerbitController extends Controller
      */
     public function destroy(string $id)
     {
-        DB::table('penerbit')->where('id_penerbit', $id)->delete();
+        $penerbit = Penerbit::find($id);
+        $penerbit->delete();
+
         return redirect('/penerbit');
     }
 }

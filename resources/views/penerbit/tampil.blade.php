@@ -11,6 +11,7 @@
             <th>No</th>
             <th>Penerbit</th>
             <th>Alamat</th>
+            <th>No Telp</th>
             <th>Aksi Edit</th>
             <th>Aksi Hapus</th>
         </thead>
@@ -19,19 +20,18 @@
                 @php
                     $i = 1;
                 @endphp
-                @foreach ($PenerbitBuku as $key => $Penerbit)
+        @foreach ($PenerbitBuku as $key => $Penerbit)
                     <tr>
-                        <td>{{ $key + 1 }}</td>
+                        <td>{{ $i }}</td>
                         <td>{{ $Penerbit->penerbit }}</td>
                         <td>{{ $Penerbit->alamat }}</td>
-                        <td><a href="{{ url('/penerbit.' . $Penerbit->id_penerbit . '.edit') }}">
+            <td>{{ $Penerbit->telepon ? $Penerbit->telepon->telepon : '-' }}</td>
+            <td><a href="{{ url('/penerbit.' . $Penerbit->id_penerbit . '.edit') }}">
+                                <input type="button" value="Edit" /></a></td>
 
-                                <input type="button" value="Edit" />
-                            </a></td>
                         <td>
-                            <form action="{{ url('/penerbit.' . $Penerbit->id_penerbit) }}" method="Post"
+                            <form action="{{ url('/penerbit.' . $Penerbit->id_penerbit) }}" method="POST"
                                 onsubmit="return confirm('Apakah data ingin dihapus?')">
-
                                 @csrf
                                 <input type="hidden" value="DELETE" name="_method">
 
@@ -39,14 +39,15 @@
                             </form>
                         </td>
                     </tr>
+                    @php
+                        $i++;
+                    @endphp
                 @endforeach
             @else
                 <p>Tidak ada data Penerbit</p>
             @endif
         <tbody>
     </table>
-    @foreach ($JumlahPenerbitBuku as $Jumlah)
-        <p>Jumlah Data {{ $Jumlah->penerbit }}: {{ $Jumlah->jumlah_penerbit }}</p>
-    @endforeach
+    <p>Jumlah Data : {{ $JumlahPenerbitBuku }}</p>
     <a href="{{ url('/penerbit.tambah') }}">Tambah Penerbit</a>
 @endsection
